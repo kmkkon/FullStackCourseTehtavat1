@@ -8,26 +8,49 @@ class App extends React.Component {
             counter: 0,
             hyva: 0,
             neutraali: 0,
-            huono: 0
+            huono: 0,
+            selected: 0,
+            votes: {
+              0: 0,
+              1: 0,
+              2: 0,
+              3: 0,
+              4: 0,
+              5: 0,
+            },
+            mostvotes: 0
         }
     }
+    
 
-    hyvapalaute = () => {
+    palaute = (tapa) => () => {
         this.setState((prevState) => ({
-            hyva: prevState.hyva + 1
+            [tapa]: prevState[tapa] + 1
           }));
     }
 
-    neutraalipalaute = () => {
-        this.setState((prevState) => ({
-            neutraali: prevState.neutraali + 1
-          }));
+    nextAnecdote = () => {
+      console.log("Next Anecdote")
+      this.setState({
+        selected: Math.floor(Math.random() * 6)
+      });
     }
 
-    huonopalaute = () => {
-        this.setState((prevState) => ({
-            huono: prevState.huono + 1
-          }));
+    voteAnecdote = () => {
+      const copyvotes = {...this.state.votes}
+      copyvotes[this.state.selected]+=1
+      let numberofvotes = 0
+      let most = 0
+      for (var i=0; i< 6;i++){
+        if (copyvotes[i]>numberofvotes){
+          most = i
+          numberofvotes = copyvotes[i]
+        }
+      }
+      this.setState({
+          votes: copyvotes,
+          mostvotes: most
+        });
     }
 
     render(){
@@ -36,23 +59,42 @@ class App extends React.Component {
               <h1>Anna palautetta</h1>
               <div>
               <Button
-                handleClick={this.hyvapalaute}
+                handleClick={this.palaute("hyva")}
                 text="Hyvä"
               />
               <Button
-                handleClick={this.neutraalipalaute}
+                handleClick={this.palaute("neutraali")}
                 text="Neutraali"
               />
               <Button
-                handleClick={this.huonopalaute}
+                handleClick={this.palaute("huono")}
                 text="Huono"
               />
               </div>
               <Statistics state = {this.state} />
+              <div>
+              <h1>Anecdotes</h1>
+              <p>{this.props.anecdotes[this.state.selected]}</p>
+              <p>This anecdote has {this.state.votes[this.state.selected]} votes</p> 
+              <button onClick={this.voteAnecdote}>Vote</button><button onClick={this.nextAnecdote}>Next Anecdote</button>
+              <h2>Anecdote with most votes is: </h2>
+              <p>{this.props.anecdotes[this.state.mostvotes]} ({this.state.mostvotes} votes)</p>
+
+      </div>
             </div>
           )
     }            
 }
+
+const anecdotes = [
+  'If it hurts, do it more often',
+  'Adding manpower to a late software project makes it later!',
+  'The first 90 percent of the code accounts for the first 90 percent of the development time...The remaining 10 percent of the code accounts for the other 90 percent of the development time.',
+  'Any fool can write code that a computer can understand. Good programmers write code that humans can understand.',
+  'Premature optimization is the root of all evil.',
+  'Debugging is twice as hard as writing the code in the first place. Therefore, if you write the code as cleverly as possible, you are, by definition, not smart enough to debug it.'
+]
+
 
 const Statistics = (props) => {
     if (props.state.hyva + props.state.neutraali + props.state.huono === 0){
@@ -96,6 +138,6 @@ const Button = (props) => (
   )
 
 ReactDOM.render(
-  <App />,
+  <App anecdotes={anecdotes}/>,
   document.getElementById('root')
 )
